@@ -6,6 +6,7 @@ import scipy.sparse
 import numpy as np
 import os, time, collections, shutil
 
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
 #NFEATURES = 28**2
 #NCLASSES = 10
@@ -97,7 +98,7 @@ class base_model(object):
 
     def fit(self, train_data, train_labels, val_data, val_labels):
         t_process, t_wall = time.process_time(), time.time()
-        sess = tf.Session(graph=self.graph)
+        sess = tf.Session(graph=self.graph,config=tf.ConfigProto(gpu_options=gpu_options))
         shutil.rmtree(self._get_path('summaries'), ignore_errors=True)
         writer = tf.summary.FileWriter(self._get_path('summaries'), self.graph)
         shutil.rmtree(self._get_path('checkpoints'), ignore_errors=True)
