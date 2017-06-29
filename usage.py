@@ -4,7 +4,7 @@ import scipy
 import matplotlib.pyplot as plt
 
 X = np.load('/Neutron9/joyneel.misra/npys/timeSeriesData_normalized_d15.npy')
-a.astype(np.float64)
+X = X.astype(np.float64)
 y = np.load('/Neutron9/joyneel.misra/npys/emotion_scores.npy')
 
 n_train = 700
