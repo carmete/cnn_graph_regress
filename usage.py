@@ -1,20 +1,23 @@
 from lib import models, graph, coarsening, utils
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 
-X = np.load('timeSeriesData_normalized_d15.npy')
-y = np.load()
+X = np.load('/Neutron9/joyneel.misra/npys/timeSeriesData_normalized_d15.npy')
+y = np.load('/Neutron9/joyneel.misra/npys/emotion_scores.npy')
 
 n_train = 700
 
 X_train = X[:n_train, ...]
-X_val   = X[n_train:n_train+n_val, ...]
+X_val   = X[n_train:, ...]
 
 y_train = y[:n_train, ...]
-y_val   = y[n_train:n_train+n_val, ...]
+y_val   = y[n_train:, ...]
 
-dist, idx = graph.distance_scipy_spatial(X_train.T, k=10, metric='euclidean')
-A = graph.adjacency(dist, idx).astype(np.float32)
+dist, idx = graph.distance_scipy_spatial(X_train.T, k=14, metric='euclidean')
+A = np.load('/Neutron9/joyneel.misra/npys/meanFC_d15.npy');
+A = scipy.sparse.csr_matrix(A)
+d = X.shape[1]
 
 assert A.shape == (d, d)
 print('d = |V| = {}, k|V| < |E| = {}'.format(d, A.nnz))
@@ -37,9 +40,8 @@ params['filter']         = 'chebyshev5'
 params['brelu']          = 'b1relu'
 params['pool']           = 'apool1'
 
-# Number of classes.
-C = y.max() + 1
-assert C == np.unique(y).size
+# Number of attributes in target.
+C = y.shape[1]
 
 # Architecture.
 params['F']              = [32, 64]  # Number of graph convolutional filters.
