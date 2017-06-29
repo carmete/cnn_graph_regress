@@ -1,4 +1,4 @@
-from lib import models, graph, coarsening, utils
+from lib import models_regress, graph, coarsening, utils
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -57,5 +57,5 @@ params['decay_rate']     = 0.95
 params['momentum']       = 0.9
 params['decay_steps']    = n_train / params['batch_size']
 
-model = models.cgcnn(L, **params)
-accuracy, loss, t_step = model.fit(X_train, y_train, X_val, y_val)
+model = models_regress.cgcnn(L, **params)
+accuracy, loss, t_step = model_regress.fit(X_train, y_train, X_val, y_val)
