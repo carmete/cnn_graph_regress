@@ -243,7 +243,7 @@ def perm_data(x, indices):
     if D is 1:
         xnew = np.reshape(xnew,[N,-1]) # N*Mnew
         
-return xnew
+    return xnew
 
 def perm_adjacency(A, indices):
     """
