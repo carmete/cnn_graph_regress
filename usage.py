@@ -14,7 +14,6 @@ X_val   = X[n_train:, ...]
 y_train = y[:n_train, ...]
 y_val   = y[n_train:, ...]
 
-dist, idx = graph.distance_scipy_spatial(X_train.T, k=14, metric='euclidean')
 A = np.load('/Neutron9/joyneel.misra/npys/meanFC_d15.npy');
 A = scipy.sparse.csr_matrix(A)
 d = X.shape[1]
