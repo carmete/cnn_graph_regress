@@ -56,5 +56,8 @@ params['decay_rate']     = 0.95
 params['momentum']       = 0.9
 params['decay_steps']    = n_train / params['batch_size']
 
+# Data
+params['time_stamps'] = X.shape[2]
+
 model = models_regress.cgcnn(L, **params)
 accuracy, loss, t_step = model_regress.fit(X_train, y_train, X_val, y_val)
