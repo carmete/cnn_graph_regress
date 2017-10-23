@@ -1,0 +1,135 @@
+2017-07-11 00:46:05.764307: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2017-07-11 00:46:05.764342: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-07-11 00:46:05.764350: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2017-07-11 00:46:05.893427: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:893] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2017-07-11 00:46:05.893879: I tensorflow/core/common_runtime/gpu/gpu_device.cc:940] Found device 0 with properties: 
+name: Tesla K40c
+major: 3 minor: 5 memoryClockRate (GHz) 0.745
+pciBusID 0000:01:00.0
+Total memory: 11.17GiB
+Free memory: 11.10GiB
+2017-07-11 00:46:05.893897: I tensorflow/core/common_runtime/gpu/gpu_device.cc:961] DMA: 0 
+2017-07-11 00:46:05.893905: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   Y 
+2017-07-11 00:46:05.893915: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: Tesla K40c, pci bus id: 0000:01:00.0)
+2017-07-11 00:50:52.336236: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: Tesla K40c, pci bus id: 0000:01:00.0)
+2017-07-11 00:55:37.843212: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: Tesla K40c, pci bus id: 0000:01:00.0)
+2017-07-11 01:00:24.231035: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1030] Creating TensorFlow device (/gpu:0) -> (device: 0, name: Tesla K40c, pci bus id: 0000:01:00.0)
+d = |V| = 50, k|V| < |E| = 2498
+Layer 0: M_0 = |V| = 56 nodes (6 added),|E| = 1224 edges
+Layer 1: M_1 = |V| = 28 nodes (3 added),|E| = 300 edges
+Layer 2: M_2 = |V| = 14 nodes (1 added),|E| = 78 edges
+Layer 3: M_3 = |V| = 7 nodes (0 added),|E| = 21 edges
+NN architecture
+  input: M_0 = 56
+  layer 1: cgconv1
+    representation: M_0 * F_1 / p_1 = 56 * 32 / 2 = 896
+    weights: F_0 * F_1 * K_1 = 1 * 32 * 20 = 640
+    biases: F_1 = 32
+  layer 2: fc1
+    representation: M_2 = 512
+    weights: M_1 * M_2 = 896 * 512 = 458752
+    biases: M_2 = 512
+  layer 3: logits (softmax)
+    representation: M_3 = 2
+    weights: M_2 * M_3 = 512 * 2 = 1024
+    biases: M_3 = 2
+step 100 / 175 (epoch 5.71 / 10):
+  learning_rate = 7.74e-04, loss_average = 9.44e-01
+  validation accuracy: 52.50 (63 / 120), f1 (weighted): 52.57, loss: 9.09e+00
+  time: 28s (wall 160s)
+step 175 / 175 (epoch 10.00 / 10):
+  learning_rate = 6.30e-04, loss_average = 8.90e-01
+  validation accuracy: 50.83 (61 / 120), f1 (weighted): 50.91, loss: 9.22e+00
+  time: 50s (wall 283s)
+validation accuracy: peak = 52.50, mean = 51.67
+d = |V| = 50, k|V| < |E| = 2498
+Layer 0: M_0 = |V| = 56 nodes (6 added),|E| = 1224 edges
+Layer 1: M_1 = |V| = 28 nodes (3 added),|E| = 300 edges
+Layer 2: M_2 = |V| = 14 nodes (1 added),|E| = 78 edges
+Layer 3: M_3 = |V| = 7 nodes (0 added),|E| = 21 edges
+NN architecture
+  input: M_0 = 56
+  layer 1: cgconv1
+    representation: M_0 * F_1 / p_1 = 56 * 32 / 2 = 896
+    weights: F_0 * F_1 * K_1 = 1 * 32 * 20 = 640
+    biases: F_1 = 32
+  layer 2: fc1
+    representation: M_2 = 512
+    weights: M_1 * M_2 = 896 * 512 = 458752
+    biases: M_2 = 512
+  layer 3: logits (softmax)
+    representation: M_3 = 2
+    weights: M_2 * M_3 = 512 * 2 = 1024
+    biases: M_3 = 2
+step 100 / 175 (epoch 5.71 / 10):
+  learning_rate = 7.74e-04, loss_average = 9.23e-01
+  validation accuracy: 59.17 (71 / 120), f1 (weighted): 59.16, loss: 5.50e+00
+  time: 26s (wall 159s)
+step 175 / 175 (epoch 10.00 / 10):
+  learning_rate = 6.30e-04, loss_average = 8.88e-01
+  validation accuracy: 58.33 (70 / 120), f1 (weighted): 58.31, loss: 5.50e+00
+  time: 48s (wall 282s)
+validation accuracy: peak = 59.17, mean = 58.75
+d = |V| = 50, k|V| < |E| = 2498
+Layer 0: M_0 = |V| = 56 nodes (6 added),|E| = 1224 edges
+Layer 1: M_1 = |V| = 28 nodes (3 added),|E| = 300 edges
+Layer 2: M_2 = |V| = 14 nodes (1 added),|E| = 78 edges
+Layer 3: M_3 = |V| = 7 nodes (0 added),|E| = 21 edges
+NN architecture
+  input: M_0 = 56
+  layer 1: cgconv1
+    representation: M_0 * F_1 / p_1 = 56 * 32 / 2 = 896
+    weights: F_0 * F_1 * K_1 = 1 * 32 * 20 = 640
+    biases: F_1 = 32
+  layer 2: fc1
+    representation: M_2 = 512
+    weights: M_1 * M_2 = 896 * 512 = 458752
+    biases: M_2 = 512
+  layer 3: logits (softmax)
+    representation: M_3 = 2
+    weights: M_2 * M_3 = 512 * 2 = 1024
+    biases: M_3 = 2
+step 100 / 175 (epoch 5.71 / 10):
+  learning_rate = 7.74e-04, loss_average = 9.79e-01
+  validation accuracy: 52.50 (63 / 120), f1 (weighted): 52.71, loss: 1.14e+01
+  time: 26s (wall 159s)
+step 175 / 175 (epoch 10.00 / 10):
+  learning_rate = 6.30e-04, loss_average = 8.90e-01
+  validation accuracy: 48.33 (58 / 120), f1 (weighted): 48.20, loss: 1.12e+01
+  time: 48s (wall 283s)
+validation accuracy: peak = 52.50, mean = 50.42
+d = |V| = 50, k|V| < |E| = 2498
+Layer 0: M_0 = |V| = 56 nodes (6 added),|E| = 1224 edges
+Layer 1: M_1 = |V| = 28 nodes (3 added),|E| = 300 edges
+Layer 2: M_2 = |V| = 14 nodes (1 added),|E| = 78 edges
+Layer 3: M_3 = |V| = 7 nodes (0 added),|E| = 21 edges
+NN architecture
+  input: M_0 = 56
+  layer 1: cgconv1
+    representation: M_0 * F_1 / p_1 = 56 * 32 / 2 = 896
+    weights: F_0 * F_1 * K_1 = 1 * 32 * 20 = 640
+    biases: F_1 = 32
+  layer 2: fc1
+    representation: M_2 = 512
+    weights: M_1 * M_2 = 896 * 512 = 458752
+    biases: M_2 = 512
+  layer 3: logits (softmax)
+    representation: M_3 = 2
+    weights: M_2 * M_3 = 512 * 2 = 1024
+    biases: M_3 = 2
+Traceback (most recent call last):
+  File "usage_classify.py", line 80, in <module>
+    accuracy, loss, t_step = model.fit(X_train, y_train, X_val, y_val)
+  File "/users/joyneel.misra/experiments/cnn_graph_regress/lib/models_classify.py", line 109, in fit
+    learning_rate, loss_average = sess.run([self.op_train, self.op_loss_average], feed_dict)
+  File "/users/joyneel.misra/anaconda3/envs/tf/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 789, in run
+    run_metadata_ptr)
+  File "/users/joyneel.misra/anaconda3/envs/tf/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 997, in _run
+    feed_dict_string, options, run_metadata)
+  File "/users/joyneel.misra/anaconda3/envs/tf/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1132, in _do_run
+    target_list, options, run_metadata)
+  File "/users/joyneel.misra/anaconda3/envs/tf/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1139, in _do_call
+    return fn(*args)
+  File "/users/joyneel.misra/anaconda3/envs/tf/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1121, in _run_fn
+    status, run_metadata)
+KeyboardInterrupt

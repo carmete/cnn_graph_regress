@@ -16,6 +16,7 @@ y_train = y[:n_train, ...]
 y_val   = y[n_train:, ...]
 
 A = np.load('/Neutron9/joyneel.misra/npys/meanFC_d15.npy');
+A = A - np.min(A)
 A = scipy.sparse.csr_matrix(A)
 d = X.shape[1]
 
@@ -28,12 +29,14 @@ X_train = coarsening.perm_data(X_train, perm)
 X_val = coarsening.perm_data(X_val, perm)
 
 L = [graph.laplacian(A, normalized=True) for A in graphs]
+L = [elem.astype(np.float32) for elem in L]
+#L = [elem.toarray() for elem in L]
 
 params = dict()
 params['dir_name']       = 'demo'
 params['num_epochs']     = 40
-params['batch_size']     = 100
-params['eval_frequency'] = 200
+params['batch_size']     = 10
+params['eval_frequency'] = 100
 
 # Building blocks.
 params['filter']         = 'chebyshev5'
@@ -59,6 +62,7 @@ params['decay_steps']    = n_train / params['batch_size']
 
 # Data
 params['time_stamps'] = X.shape[2]
+params['out_siz'] = y.shape[1]
 
 model = models_regress.cgcnn(L, **params)
-accuracy, loss, t_step = model_regress.fit(X_train, y_train, X_val, y_val)
+accuracy, loss, t_step = model.fit(X_train, y_train, X_val, y_val)

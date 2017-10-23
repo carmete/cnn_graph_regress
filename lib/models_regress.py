@@ -3,10 +3,11 @@ from . import graph
 import tensorflow as tf
 import sklearn
 import scipy.sparse
+from sklearn.metrics import r2_score
 import numpy as np
 import os, time, collections, shutil
 
-gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+'''gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)'''
 
 #NFEATURES = 28**2
 #NCLASSES = 10
@@ -25,30 +26,30 @@ class base_model(object):
     def predict(self, data, labels=None, sess=None):
         loss = 0
         size = data.shape[0]
-        predictions = np.empty(size)
+        predictions = np.empty((size,labels.shape[1]))
         sess = self._get_session(sess)
         for begin in range(0, size, self.batch_size):
             end = begin + self.batch_size
             end = min([end, size])
             
-            batch_data = np.zeros((self.batch_size, data.shape[1]))
-            tmp_data = data[begin:end,:]
+            batch_data = np.zeros((self.batch_size, data.shape[1], data.shape[2]))
+            tmp_data = data[begin:end,...]
             if type(tmp_data) is not np.ndarray:
                 tmp_data = tmp_data.toarray()  # convert sparse matrices
-            batch_data[:end-begin] = tmp_data
+            batch_data[:end-begin,...] = tmp_data[:,...]
             feed_dict = {self.ph_data: batch_data, self.ph_dropout: 1}
             
             # Compute loss if labels are given.
             if labels is not None:
-                batch_labels = np.zeros(self.batch_size)
-                batch_labels[:end-begin] = labels[begin:end]
+                batch_labels = np.zeros((self.batch_size, labels.shape[1]))
+                batch_labels[:end-begin,...] = labels[begin:end]
                 feed_dict[self.ph_labels] = batch_labels
                 batch_pred, batch_loss = sess.run([self.op_prediction, self.op_loss], feed_dict)
                 loss += batch_loss
             else:
                 batch_pred = sess.run(self.op_prediction, feed_dict)
             
-            predictions[begin:end] = batch_pred[:end-begin]
+            predictions[begin:end,...] = batch_pred[:end-begin,...]
             
         if labels is not None:
             return predictions, loss * self.batch_size / size
@@ -86,11 +87,12 @@ class base_model(object):
         ### NEW ###
         y = labels
         f = predictions
-        y_bar = np.mean(y)
-        SS_tot = np.dot(y - y_bar, y - y_bar)
-        SS_res = np.dot(y - f, y - f)
-        R_squared = 1 - (SS_res / SS_tot)
-        string = 'R_squared: {:.2f}, loss: {:.2e}'.format(R_squared, loss)
+        R_squared = r2_score(y, f)
+        #y_bar = np.mean(y)
+        #SS_tot = np.sum(np.sum(np.dot(y - y_bar, np.transpose(y - y_bar))))
+        #SS_res = np.sum(np.sum(np.dot(y - f, np.transpose(y - f))))
+        #R_squared = 1 - (SS_res / SS_tot)
+        string = 'R_squared: {:.2e}, loss: {:.2e}'.format(R_squared, loss)
         if sess is None:
             string += '\ntime: {:.0f}s (wall {:.0f}s)'.format(time.process_time()-t_process, time.time()-t_wall)
         return string, R_squared, loss
@@ -98,7 +100,7 @@ class base_model(object):
 
     def fit(self, train_data, train_labels, val_data, val_labels):
         t_process, t_wall = time.process_time(), time.time()
-        sess = tf.Session(graph=self.graph,config=tf.ConfigProto(gpu_options=gpu_options))
+        sess = tf.Session(graph=self.graph)#,config=tf.ConfigProto(gpu_options=gpu_options))
         shutil.rmtree(self._get_path('summaries'), ignore_errors=True)
         writer = tf.summary.FileWriter(self._get_path('summaries'), self.graph)
         shutil.rmtree(self._get_path('checkpoints'), ignore_errors=True)
@@ -118,7 +120,7 @@ class base_model(object):
                 indices.extend(np.random.permutation(train_data.shape[0]))
             idx = [indices.popleft() for i in range(self.batch_size)]
 
-            batch_data, batch_labels = train_data[idx,:], train_labels[idx]
+            batch_data, batch_labels = train_data[idx,...], train_labels[idx,...]
             if type(batch_data) is not np.ndarray:
                 batch_data = batch_data.toarray()  # convert sparse matrices
             feed_dict = {self.ph_data: batch_data, self.ph_labels: batch_labels, self.ph_dropout: self.dropout}
@@ -130,7 +132,7 @@ class base_model(object):
                 print('step {} / {} (epoch {:.2f} / {}):'.format(step, num_steps, epoch, self.num_epochs))
                 print('  learning_rate = {:.2e}, loss_average = {:.2e}'.format(learning_rate, loss_average))
                 string, R_squared, loss = self.evaluate(val_data, val_labels, sess)
-                R_sqaureds.append(accuracy)
+                R_sqaureds.append(R_squared)
                 losses.append(loss)
                 print('  validation {}'.format(string))
                 print('  time: {:.0f}s (wall {:.0f}s)'.format(time.process_time()-t_process, time.time()-t_wall))
@@ -150,7 +152,7 @@ class base_model(object):
         sess.close()
         
         t_step = (time.time() - t_wall) / num_steps
-        return accuracies, losses, t_step
+        return R_sqaureds, losses, t_step
 
     def get_var(self, name):
         sess = self._get_session()
@@ -161,7 +163,7 @@ class base_model(object):
 
     # Methods to construct the computational graph.
     
-    def build_graph(self, M_0, time_stamps):
+    def build_graph(self, M_0, time_stamps, out_siz):
         """Build the computational graph of the model."""
         self.graph = tf.Graph()
         with self.graph.as_default():
@@ -169,7 +171,7 @@ class base_model(object):
             # Inputs.
             with tf.name_scope('inputs'):
                 self.ph_data = tf.placeholder(tf.float32, (self.batch_size, M_0, time_stamps), 'data') #(820, 15, 4800) change code for 3rd dimension
-                self.ph_labels = tf.placeholder(tf.int32, (self.batch_size), 'labels') # have to add None or user input size for output
+                self.ph_labels = tf.placeholder(tf.float32, (self.batch_size, out_siz), 'labels') # have to add None or user input size for output
                 self.ph_dropout = tf.placeholder(tf.float32, (), 'dropout')
 
             # Model.
@@ -220,22 +222,20 @@ class base_model(object):
     def loss(self, logits, labels, regularization):
         """Adds to the inference model the layers required to generate loss."""
         with tf.name_scope('loss'):
-            with tf.name_scope('cross_entropy'):
-                labels = tf.to_int64(labels)
-                cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-                cross_entropy = tf.reduce_mean(cross_entropy)
+            with tf.name_scope('mse'):
+                mse = tf.reduce_mean(tf.square(logits - labels))
             with tf.name_scope('regularization'):
                 regularization *= tf.add_n(self.regularizers)
-            loss = cross_entropy + regularization
+            loss = mse + regularization
             
             # Summaries for TensorBoard.
-            tf.summary.scalar('loss/cross_entropy', cross_entropy)
+            tf.summary.scalar('loss/mse', mse)
             tf.summary.scalar('loss/regularization', regularization)
             tf.summary.scalar('loss/total', loss)
             with tf.name_scope('averages'):
                 averages = tf.train.ExponentialMovingAverage(0.9)
-                op_averages = averages.apply([cross_entropy, regularization, loss])
-                tf.summary.scalar('loss/avg/cross_entropy', averages.average(cross_entropy))
+                op_averages = averages.apply([mse, regularization, loss])
+                tf.summary.scalar('loss/avg/mse', averages.average(mse))
                 tf.summary.scalar('loss/avg/regularization', averages.average(regularization))
                 tf.summary.scalar('loss/avg/total', averages.average(loss))
                 with tf.control_dependencies([op_averages]):
@@ -756,7 +756,7 @@ class cgcnn(base_model):
     Directories:
         dir_name: Name for directories (summaries and model parameters).
     """
-    def __init__(self, L, F, K, p, M, time_stamps, filter='chebyshev5', brelu='b1relu', pool='mpool1',
+    def __init__(self, L, F, K, p, M, time_stamps, out_siz, filter='chebyshev5', brelu='b1relu', pool='mpool1',
                 num_epochs=20, learning_rate=0.1, decay_rate=0.95, decay_steps=None, momentum=0.9,
                 regularization=0, dropout=0, batch_size=100, eval_frequency=200,
                 dir_name=''):
@@ -816,7 +816,7 @@ class cgcnn(base_model):
         self.pool = getattr(self, pool)
         
         # Build the computational graph.
-        self.build_graph(M_0, time_stamps)
+        self.build_graph(M_0, time_stamps, out_siz)
         
     def filter_in_fourier(self, x, L, Fout, K, U, W):
         # TODO: N x F x M would avoid the permutations
@@ -961,12 +961,12 @@ class cgcnn(base_model):
         W = self._weight_variable([int(Min), Mout], regularization=True)
         b = self._bias_variable([Mout], regularization=True)
         x = tf.matmul(x, W) + b
-        return tf.nn.relu(x) if relu else x
+        return tf.tanh(x) if relu else x
 
     def _inference(self, x, dropout):
         # Graph convolutional layers.
         if len(x.shape) == 2:
-			x = tf.expand_dims(x, 2)  # N x M x F=1
+            x = tf.expand_dims(x, 2)  # N x M x F=1
         for i in range(len(self.p)):
             with tf.variable_scope('conv{}'.format(i+1)):
                 with tf.name_scope('filter'):

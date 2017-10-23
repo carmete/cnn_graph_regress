@@ -30,11 +30,11 @@ class base_model(object):
             end = begin + self.batch_size
             end = min([end, size])
             
-            batch_data = np.zeros((self.batch_size, data.shape[1]))
-            tmp_data = data[begin:end,:]
+            batch_data = np.zeros((self.batch_size, data.shape[1], data.shape[2]))
+            tmp_data = data[begin:end,...]
             if type(tmp_data) is not np.ndarray:
                 tmp_data = tmp_data.toarray()  # convert sparse matrices
-            batch_data[:end-begin] = tmp_data
+            batch_data[:end-begin,...] = tmp_data
             feed_dict = {self.ph_data: batch_data, self.ph_dropout: 1}
             
             # Compute loss if labels are given.
@@ -48,7 +48,7 @@ class base_model(object):
                 batch_pred = sess.run(self.op_prediction, feed_dict)
             
             predictions[begin:end] = batch_pred[:end-begin]
-            
+            #print(predictions)            
         if labels is not None:
             return predictions, loss * self.batch_size / size
         else:
@@ -102,7 +102,7 @@ class base_model(object):
                 indices.extend(np.random.permutation(train_data.shape[0]))
             idx = [indices.popleft() for i in range(self.batch_size)]
 
-            batch_data, batch_labels = train_data[idx,:], train_labels[idx]
+            batch_data, batch_labels = train_data[idx,...], train_labels[idx]
             if type(batch_data) is not np.ndarray:
                 batch_data = batch_data.toarray()  # convert sparse matrices
             feed_dict = {self.ph_data: batch_data, self.ph_labels: batch_labels, self.ph_dropout: self.dropout}
@@ -146,14 +146,14 @@ class base_model(object):
 
     # Methods to construct the computational graph.
     
-    def build_graph(self, M_0):
+    def build_graph(self, M_0, time_steps):
         """Build the computational graph of the model."""
         self.graph = tf.Graph()
         with self.graph.as_default():
 
             # Inputs.
             with tf.name_scope('inputs'):
-                self.ph_data = tf.placeholder(tf.float32, (self.batch_size, M_0), 'data')
+                self.ph_data = tf.placeholder(tf.float32, (self.batch_size, M_0, time_steps), 'data')
                 self.ph_labels = tf.placeholder(tf.int32, (self.batch_size), 'labels')
                 self.ph_dropout = tf.placeholder(tf.float32, (), 'dropout')
 
@@ -741,7 +741,7 @@ class cgcnn(base_model):
     Directories:
         dir_name: Name for directories (summaries and model parameters).
     """
-    def __init__(self, L, F, K, p, M, filter='chebyshev5', brelu='b1relu', pool='mpool1',
+    def __init__(self, L, F, K, p, M, time_steps, filter='chebyshev5', brelu='b1relu', pool='mpool1',
                 num_epochs=20, learning_rate=0.1, decay_rate=0.95, decay_steps=None, momentum=0.9,
                 regularization=0, dropout=0, batch_size=100, eval_frequency=200,
                 dir_name=''):
@@ -801,7 +801,7 @@ class cgcnn(base_model):
         self.pool = getattr(self, pool)
         
         # Build the computational graph.
-        self.build_graph(M_0)
+        self.build_graph(M_0, time_steps)
         
     def filter_in_fourier(self, x, L, Fout, K, U, W):
         # TODO: N x F x M would avoid the permutations
@@ -950,7 +950,8 @@ class cgcnn(base_model):
 
     def _inference(self, x, dropout):
         # Graph convolutional layers.
-        x = tf.expand_dims(x, 2)  # N x M x F=1
+        if len(x.shape) == 2:
+            x = tf.expand_dims(x, 2)  # N x M x F=1
         for i in range(len(self.p)):
             with tf.variable_scope('conv{}'.format(i+1)):
                 with tf.name_scope('filter'):
